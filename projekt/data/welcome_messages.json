@@ -1,0 +1,22 @@
+[
+  "Welcome to the server, {user}! Ready to push some trophies?",
+  "Hey {user}, glad you joined! Let’s climb together.",
+  "{user} just joined the lobby. Let’s get some wins!",
+  "Welcome {user}! Time to show your skills.",
+  "{user} entered the arena. Good luck and have fun!",
+  "Hey {user}, welcome! Who’s your main?",
+  "{user} joined the server. Let’s grind some trophies!",
+  "Welcome {user}! Hope you brought your best brawler.",
+  "{user} is here! Let’s build a strong team.",
+  "Hey {user}, ready for some matches?",
+  "{user} joined! Let’s see those stats.",
+  "Welcome {user}! Time to push ranks.",
+  "{user} is in. Let’s go for some wins!",
+  "Hey {user}, welcome to the squad!",
+  "{user} joined the server. Let’s dominate!",
+  "Welcome {user}! Play smart and have fun.",
+  "{user} is here! Let’s get those trophies up.",
+  "Hey {user}, glad you joined us!",
+  "{user} joined. Time to team up!",
+  "Welcome {user}! Let’s make some progress."
+]

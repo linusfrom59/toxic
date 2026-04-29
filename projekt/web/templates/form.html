@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Verification</title>
+  <style>
+    :root {
+      --text: #fff7ff;
+      --muted: rgba(255,246,255,.82);
+      --panel: rgba(32,20,44,.35);
+      --panel2: rgba(20,12,31,.62);
+      --line: rgba(255,255,255,.16);
+      --input: rgba(255,255,255,.1);
+      --input-focus: rgba(255,255,255,.16);
+      --shadow: 0 24px 80px rgba(0,0,0,.46);
+      --button: linear-gradient(90deg,#7d36ff 0%,#f05dbf 100%);
+      --button-off: rgba(255,255,255,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%}
+    body{
+      font-family: Inter, Arial, sans-serif;
+      color:var(--text);
+      background:#0d0814;
+      overflow:hidden;
+    }
+    .bg-fixed{
+      position:fixed; inset:0;
+      background:url('/static/bg.jpg') center center / cover no-repeat;
+      transform:scale(1.04);
+      filter:brightness(.58);
+      z-index:0;
+    }
+    .bg-overlay{
+      position:fixed; inset:0; z-index:1;
+      background:rgba(0,0,0,.48);
+    }
+    .scroll-layer{
+      position:relative; z-index:2; height:100vh; overflow-y:auto;
+      padding:42px 16px; display:flex; justify-content:center; align-items:flex-start;
+    }
+    .mask-card{
+      width:min(100%, 760px); border-radius:34px; border:1px solid var(--line);
+      background:var(--panel); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+      box-shadow:var(--shadow); padding:24px; display:grid; gap:20px;
+    }
+    .top-note,.field-group,.privacy-shell,.mini-badge{
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+    }
+    .top-note{ text-align:center; padding:14px 16px; border-radius:18px; font-weight:700; line-height:1.55; }
+    .title-wrap{ text-align:center; display:grid; gap:10px; }
+    .mini-badge{ margin:0 auto; display:inline-flex; align-items:center; justify-content:center; padding:9px 14px; border-radius:999px; font-size:12px; letter-spacing:.15em; text-transform:uppercase; }
+    h1{margin:0;font-size:clamp(34px,5vw,56px);line-height:1.06}
+    h2{margin:0 0 12px;font-size:28px}
+    p{margin:0;color:var(--muted);line-height:1.7}
+    .verification-form{display:grid;gap:16px}
+    .field-group{display:grid;gap:8px;padding:18px;border-radius:22px}
+    label{font-size:14px;font-weight:800}
+    input,select,button{font:inherit}
+    input,select{width:100%;border:1px solid rgba(255,255,255,.14);background:var(--input);color:var(--text);border-radius:16px;padding:15px 16px;outline:none}
+    input::placeholder{color:rgba(255,247,255,.52)}
+    input:focus,select:focus{background:var(--input-focus);border-color:rgba(255,255,255,.28)}
+    select option{color:#111}
+    .field-hint,.muted-copy{color:var(--muted);font-size:13px;line-height:1.55}
+    .privacy-shell{display:grid;gap:14px;padding:20px;border-radius:24px;background:var(--panel2)}
+    .privacy-toggle,.done-button{width:100%;border:0;border-radius:18px;padding:16px 20px;font-weight:800;color:var(--text);cursor:pointer;background:var(--button)}
+    .privacy-panel{overflow:hidden;border-radius:22px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)}
+    .privacy-scroll{max-height:420px;overflow-y:auto;padding:20px;display:grid;gap:14px}
+    .privacy-end-marker{padding-top:18px;border-top:1px solid rgba(255,255,255,.14);font-weight:800;color:var(--text)}
+    .done-button{position:sticky;bottom:0;margin-top:6px}
+    .done-button:disabled{background:var(--button-off);cursor:not-allowed}
+    .rank-select{position:relative}
+    .rank-trigger{
+      width:100%;border:1px solid rgba(255,255,255,.14);background:var(--input);color:var(--text);
+      border-radius:16px;padding:13px 16px;outline:none;display:flex;align-items:center;justify-content:space-between;
+      gap:14px;text-align:left;
+    }
+    .rank-trigger:focus,.rank-trigger.open{background:var(--input-focus);border-color:rgba(255,255,255,.28)}
+    .rank-trigger-inner{display:flex;align-items:center;gap:12px;min-height:28px}
+    .rank-trigger-inner img,.rank-option img{width:34px;height:34px;object-fit:contain;flex:0 0 34px}
+    .rank-placeholder{color:rgba(255,247,255,.72)}
+    .rank-caret{font-size:22px;line-height:1;opacity:.9}
+    .rank-menu{
+      position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:20;max-height:340px;overflow-y:auto;
+      border:1px solid rgba(255,255,255,.14);background:rgba(22,13,34,.98);border-radius:18px;padding:8px;
+      box-shadow:0 24px 80px rgba(0,0,0,.4);
+    }
+    .rank-option{
+      width:100%;border:0;background:transparent;color:var(--text);padding:10px 12px;border-radius:14px;
+      display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;font-weight:700;
+    }
+    .rank-option:hover{background:rgba(255,255,255,.08)}
+    .rank-option.selected{background:rgba(255,255,255,.12)}
+
+    @media (max-width: 720px){.scroll-layer{padding:18px 10px}.mask-card{padding:18px;border-radius:24px}.field-group,.privacy-shell{padding:14px}h1{font-size:38px}}
+  </style>
+</head>
+<body>
+  <div class="bg-fixed"></div>
+  <div class="bg-overlay"></div>
+  <main class="scroll-layer">
+    <section class="mask-card">
+      <div class="top-note">Please be honest with your information, as all submitted details will be checked.</div>
+      <div class="title-wrap">
+        <div class="mini-badge">Verification Form</div>
+        <h1>Player Verification</h1>
+        <p>Fill out the form below so the staff team can verify your account.</p>
+      </div>
+      <form action="/submit" method="POST" enctype="multipart/form-data" class="verification-form">
+        <div class="field-group">
+          <label for="age_group">Age</label>
+          <select id="age_group" name="age_group" required>
+            <option value="" disabled selected>Select your age group</option>
+            <option value="Under 18">&lt;18</option>
+            <option value="18+">18+</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="country">Country</label>
+          <input type="text" id="country" name="country" placeholder="Enter your country" required>
+        </div>
+        <div class="field-group">
+          <label for="profile_image">Profile</label>
+          <input type="file" id="profile_image" name="profile_image" accept="image/*" required>
+          <div class="field-hint">Upload a profile image or screenshot. It will be sent to staff for verification.</div>
+        </div>
+        <div class="field-group">
+          <label for="highest_rank_value">Highest Rank</label>
+          <div class="rank-select" id="rankSelect">
+            <input type="hidden" id="highest_rank_value" name="highest_rank" value="">
+            <button type="button" class="rank-trigger" id="rankTrigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="rank-trigger-inner" id="rankTriggerInner">Select your highest rank</span>
+              <span class="rank-caret">⌄</span>
+            </button>
+            <div class="rank-menu" id="rankMenu" hidden role="listbox">
+              <button type="button" class="rank-option" data-value="Diamond I"><img src="../static/rank-icons/diamond.png" alt=""><span>Diamond I</span></button>
+              <button type="button" class="rank-option" data-value="Diamond II"><img src="../static/rank-icons/diamond.png" alt=""><span>Diamond II</span></button>
+              <button type="button" class="rank-option" data-value="Diamond III"><img src="../static/rank-icons/diamond.png" alt=""><span>Diamond III</span></button>
+              <button type="button" class="rank-option" data-value="Mythic I"><img src="../static/rank-icons/mythic.png" alt=""><span>Mythic I</span></button>
+              <button type="button" class="rank-option" data-value="Mythic II"><img src="../static/rank-icons/mythic.png" alt=""><span>Mythic II</span></button>
+              <button type="button" class="rank-option" data-value="Mythic III"><img src="../static/rank-icons/mythic.png" alt=""><span>Mythic III</span></button>
+              <button type="button" class="rank-option" data-value="Legendary I"><img src="../static/rank-icons/legendary.png" alt=""><span>Legendary I</span></button>
+              <button type="button" class="rank-option" data-value="Legendary II"><img src="../static/rank-icons/legendary.png" alt=""><span>Legendary II</span></button>
+              <button type="button" class="rank-option" data-value="Legendary III"><img src="../static/rank-icons/legendary.png" alt=""><span>Legendary III</span></button>
+              <button type="button" class="rank-option" data-value="Masters I"><img src="../static/rank-icons/masters.png" alt=""><span>Masters I</span></button>
+              <button type="button" class="rank-option" data-value="Masters II"><img src="../static/rank-icons/masters.png" alt=""><span>Masters II</span></button>
+              <button type="button" class="rank-option" data-value="Masters III"><img src="../static/rank-icons/masters.png" alt=""><span>Masters III</span></button>
+              <button type="button" class="rank-option" data-value="Pro"><img src="../static/rank-icons/pro.png" alt=""><span>Pro</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="highest_trophies">Highest Trophies</label>
+          <select id="highest_trophies" name="highest_trophies" required>
+            <option value="" disabled selected>Select your highest trophies</option>
+            <option>50-60k</option><option>60-80k</option><option>80-100k</option><option>100-130k</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="ingame_name">In-Game Name</label>
+          <input type="text" id="ingame_name" name="ingame_name" placeholder="Enter your in-game name" required>
+          <div class="field-hint">This can be used as your server nickname after verification.</div>
+        </div>
+        <div class="field-group">
+          <label for="club_member">Club Member</label>
+          <select id="club_member" name="club_member" required>
+            <option value="" disabled selected>Select an option</option>
+            <option>Yes</option><option>No</option>
+          </select>
+        </div>
+        <input type="hidden" name="privacy_opened" id="privacy_opened" value="false">
+        <input type="hidden" name="privacy_scrolled" id="privacy_scrolled" value="false">
+        <section class="privacy-shell">
+          <button type="button" class="privacy-toggle" id="privacyToggle">Privacy Policy</button>
+          <div class="privacy-panel" id="privacyPanel" hidden>
+            <div class="privacy-scroll" id="privacyScroll">
+              <h2>Privacy Policy</h2>
+              <p>We collect the information you submit in this form to review your application and manage access to our Discord community.</p>
+              <p>Your uploaded profile image may be reviewed by the support team and staff members to verify that the submitted details match your player profile.</p>
+              <p>Your in-game name may be used to assign your Discord nickname after your verification is approved.</p>
+              <p>We only request information that is necessary for verification, moderation, and community management.</p>
+              <p>We do not ask for passwords, payment data, or unrelated private information.</p>
+              <p>Your submission may be stored internally for verification history, moderation tracking, and follow-up checks if required.</p>
+              <p>Only authorised team members should have access to this information, and it should only be used for internal review purposes.</p>
+              <p>By continuing with this form, you confirm that your details are accurate and that your application can be reviewed manually.</p>
+              <p>You must scroll all the way to the bottom before the final button becomes available.</p>
+              <div class="privacy-end-marker">End of Privacy Policy</div>
+              <button type="submit" class="done-button" id="doneButton" disabled>Done</button>
+            </div>
+          </div>
+        </section>
+      </form>
+    </section>
+  </main>
+  <script>
+    const privacyToggle = document.getElementById('privacyToggle');
+    const privacyPanel = document.getElementById('privacyPanel');
+    const privacyScroll = document.getElementById('privacyScroll');
+    const doneButton = document.getElementById('doneButton');
+    const privacyOpenedInput = document.getElementById('privacy_opened');
+    const privacyScrolledInput = document.getElementById('privacy_scrolled');
+    const verificationForm = document.querySelector('.verification-form');
+    const rankSelect = document.getElementById('rankSelect');
+    const rankTrigger = document.getElementById('rankTrigger');
+    const rankTriggerInner = document.getElementById('rankTriggerInner');
+    const rankMenu = document.getElementById('rankMenu');
+    const rankValueInput = document.getElementById('highest_rank_value');
+    const rankOptions = Array.from(document.querySelectorAll('.rank-option'));
+    let opened = false; let scrolledToBottom = false;
+
+    function openRankMenu() {
+      rankMenu.hidden = false;
+      rankTrigger.classList.add('open');
+      rankTrigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeRankMenu() {
+      rankMenu.hidden = true;
+      rankTrigger.classList.remove('open');
+      rankTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function setRank(value, imageSrc) {
+      rankValueInput.value = value;
+      rankTriggerInner.innerHTML = `<img src="${imageSrc}" alt=""><span>${value}</span>`;
+      rankOptions.forEach(option => option.classList.toggle('selected', option.dataset.value === value));
+      closeRankMenu();
+    }
+
+    rankTrigger.addEventListener('click', () => {
+      if (rankMenu.hidden) openRankMenu(); else closeRankMenu();
+    });
+
+    rankOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        const image = option.querySelector('img');
+        setRank(option.dataset.value, image ? image.getAttribute('src') : '');
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!rankSelect.contains(event.target)) closeRankMenu();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeRankMenu();
+    });
+
+    privacyToggle.addEventListener('click', () => {
+      const opening = privacyPanel.hidden;
+      privacyPanel.hidden = !privacyPanel.hidden;
+      if (opening) { opened = true; privacyOpenedInput.value = 'true'; }
+      privacyToggle.textContent = privacyPanel.hidden ? 'Privacy Policy' : 'Privacy Policy Opened';
+      doneButton.disabled = !(opened && scrolledToBottom);
+    });
+
+    privacyScroll.addEventListener('scroll', () => {
+      const atBottom = privacyScroll.scrollTop + privacyScroll.clientHeight >= privacyScroll.scrollHeight - 6;
+      if (atBottom) { scrolledToBottom = true; privacyScrolledInput.value = 'true'; doneButton.disabled = !(opened && scrolledToBottom); }
+    });
+
+    verificationForm.addEventListener('submit', (event) => {
+      if (!rankValueInput.value) {
+        event.preventDefault();
+        openRankMenu();
+        rankTrigger.focus();
+        alert('Please select your highest rank.');
+      }
+    });
+
+    rankTriggerInner.innerHTML = '<span class="rank-placeholder">Select your highest rank</span>';
+  </script>
+</body>
+</html>
