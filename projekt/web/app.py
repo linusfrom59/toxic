@@ -5,7 +5,7 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
 
-from database.db import init_db, save_submission, get_connection
+from projekt.database.db import init_db, save_submission, get_connection
 
 app = Flask(
     __name__,
