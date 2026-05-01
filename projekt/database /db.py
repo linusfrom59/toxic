@@ -142,4 +142,5 @@ def get_recent_submission_ids(limit=100):
     cursor.execute('SELECT id FROM submissions ORDER BY id DESC LIMIT ?', (limit,))
     ids = [row['id'] for row in cursor.fetchall()]
     conn.close()
-    return ids
+    return ids  
+    hgcb
