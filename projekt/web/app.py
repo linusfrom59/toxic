@@ -1,23 +1,21 @@
 from flask import Flask, render_template, request
-import sys
 from pathlib import Path
+from database.db import init_db, save_submission, get_connection
 
+# Projekt-Root bestimmen
 project_root = Path(__file__).resolve().parent.parent
-sys.path.append(str(project_root))
 
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-from ..database.db import init_db, save_submission, get_connection
+# Flask App
 app = Flask(
     __name__,
     template_folder=str(project_root / 'web' / 'templates'),
     static_folder=str(project_root / 'web' / 'static'),
 )
+
+# Upload Limit
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
 
+# DB initialisieren
 init_db()
 
 
@@ -39,12 +37,17 @@ def submit():
     profile_image = request.files.get('profile_image')
 
     profile_image_name = ''
+
     if profile_image and profile_image.filename:
         uploads_dir = project_root / 'web' / 'static' / 'uploads'
         uploads_dir.mkdir(parents=True, exist_ok=True)
-        safe_name = ''.join(ch for ch in profile_image.filename if ch.isalnum() or ch in '._-')
-        profile_image_name = f"{ingame_name.replace(' ', '_')}_{safe_name}" if safe_name else ''
-        if profile_image_name:
+
+        safe_name = ''.join(
+            ch for ch in profile_image.filename if ch.isalnum() or ch in '._-'
+        )
+
+        if safe_name:
+            profile_image_name = f"{ingame_name.replace(' ', '_')}_{safe_name}"
             profile_image.save(uploads_dir / profile_image_name)
 
     link_code = save_submission(
@@ -66,11 +69,15 @@ def submit():
 def admin():
     conn = get_connection()
     cursor = conn.cursor()
+
     cursor.execute('SELECT * FROM submissions ORDER BY id DESC')
     rows = cursor.fetchall()
+
     conn.close()
+
     return render_template('admin.html', rows=rows)
 
 
 if __name__ == '__main__':
+    app.run(debug=True)
     app.run(debug=True)
