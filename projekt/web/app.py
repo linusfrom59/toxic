@@ -10,8 +10,7 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from database.db import init_db, save_submission, get_connection
-
+from ..database.db import init_db, save_submission, get_connection
 app = Flask(
     __name__,
     template_folder=str(project_root / 'web' / 'templates'),
