@@ -11,7 +11,7 @@ project_root = Path(__file__).resolve().parent.parent
 sys.path.append(str(project_root))
 load_dotenv(project_root / '.env')
 
-from projekt.database.db import init_db, link_discord_account, get_submission, get_unannounced_submissions, mark_submission_announced, get_recent_submission_ids
+from database.db import init_db, link_discord_account, get_submission, get_unannounced_submissions, mark_submission_announced, get_recent_submission_ids
 
 intents = discord.Intents.default()
 intents.members = True
