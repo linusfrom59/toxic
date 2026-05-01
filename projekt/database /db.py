@@ -143,4 +143,3 @@ def get_recent_submission_ids(limit=100):
     ids = [row['id'] for row in cursor.fetchall()]
     conn.close()
     return ids  
-    hgcb
